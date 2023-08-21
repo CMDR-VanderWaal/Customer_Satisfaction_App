@@ -1,15 +1,7 @@
-# Login App
+# Customer Satisfaction Emp0loyee side app 
 
-A Login model app made in flutter.
+An app that allows employees to view amd monitor customer satisfacition detailes and statistics.
 
-## Features
 
-- Register Account
-- Account validation
-- Save accounts
-
-## Screenshots
-
-|                                     |                                     |                                     |
-|-------------------------------------|-------------------------------------|-------------------------------------|
-| ![image_1](screenshots/image_1.png) | ![image_2](screenshots/image_2.png) | ![image_3](screenshots/image_3.png) |
+## 
+##
