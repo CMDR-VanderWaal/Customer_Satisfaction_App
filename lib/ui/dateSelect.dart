@@ -3,14 +3,14 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 import 'login.dart';
 
-class Home extends StatefulWidget {
-  const Home({super.key});
+class DateSelector extends StatefulWidget {
+  const DateSelector({super.key});
 
   @override
-  State<Home> createState() => _HomeState();
+  State<DateSelector> createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeState extends State<DateSelector> {
   final Box _boxLogin = Hive.box("login");
 
   final String _pickedDateKey = "pickedDate";
