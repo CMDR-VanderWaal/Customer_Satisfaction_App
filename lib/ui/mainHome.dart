@@ -1,9 +1,31 @@
 import "package:flutter/material.dart";
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:login_flutter/ui/overallReport.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:login_flutter/auth.dart';
 
 import "login.dart";
+import 'customerWise.dart';
+import 'overallReport.dart';
 
 class Home extends StatelessWidget {
-  const Home({super.key});
+  Home({Key? key}) : super(key: key);
+  final Box _boxLogin = Hive.box("login");
+  final User? user = Auth().currentUser;
+  Future<void> signOut() async {
+    await Auth().signOut();
+  }
+
+  Widget _userUid() {
+    return Text(user?.email ?? 'User email');
+  }
+
+  Widget _signOutButton() {
+    return ElevatedButton(
+      onPressed: signOut,
+      child: const Text('Sign Out'),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,8 +40,35 @@ class Home extends StatelessWidget {
       backgroundColor: Theme.of(context).colorScheme.primaryContainer,
       appBar: AppBar(
         title: const Center(
-          child: Text("Home"),
+          child: Text("\t\t\t\t Home"),
         ),
+        elevation: 0,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white),
+              ),
+              child: IconButton(
+                onPressed: () {
+                  _boxLogin.clear();
+                  _boxLogin.put("loginStatus", false);
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) {
+                        return const Login();
+                      },
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.logout_rounded),
+              ),
+            ),
+          )
+        ],
       ),
       body: Center(
         child: Container(
@@ -31,12 +80,12 @@ class Home extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(
-                width: width * 0.25,
+                width: width * 0.29,
                 height: height * 0.25,
                 child: Center(
                   child: Text(
                     'Welcome Employee name',
-                    style: TextStyle(fontSize: height / 29),
+                    style: TextStyle(fontSize: height / 25),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -57,7 +106,15 @@ class Home extends StatelessWidget {
                           ),
                         ),
                         onPressed: () {
-                          print('Row Button 1');
+                          //print('Row Button 1');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return const CustomerWise();
+                              },
+                            ),
+                          );
                         },
                         child: Text(
                           'Customer Wise Report',
@@ -80,7 +137,15 @@ class Home extends StatelessWidget {
                           ),
                         ),
                         onPressed: () {
-                          print(rowButtonH);
+                          //print('Row Button 2');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return const OverallReport();
+                              },
+                            ),
+                          );
                         },
                         child: Text(
                           "Overall Report",
