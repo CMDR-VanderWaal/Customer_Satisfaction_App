@@ -53,13 +53,14 @@ class Home extends StatelessWidget {
               ),
               child: IconButton(
                 onPressed: () {
+                  signOut;
                   _boxLogin.clear();
                   _boxLogin.put("loginStatus", false);
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
                       builder: (context) {
-                        return const Login();
+                        return Login();
                       },
                     ),
                   );
