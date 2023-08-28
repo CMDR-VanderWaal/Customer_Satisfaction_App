@@ -1,6 +1,9 @@
 import "package:flutter/material.dart";
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:login_flutter/ui/overallReport.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:login_flutter/auth.dart';
+
 import "login.dart";
 import 'customerWise.dart';
 import 'overallReport.dart';
@@ -8,6 +11,21 @@ import 'overallReport.dart';
 class Home extends StatelessWidget {
   Home({Key? key}) : super(key: key);
   final Box _boxLogin = Hive.box("login");
+  final User? user = Auth().currentUser;
+  Future<void> signOut() async {
+    await Auth().signOut();
+  }
+
+  Widget _userUid() {
+    return Text(user?.email ?? 'User email');
+  }
+
+  Widget _signOutButton() {
+    return ElevatedButton(
+      onPressed: signOut,
+      child: const Text('Sign Out'),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
