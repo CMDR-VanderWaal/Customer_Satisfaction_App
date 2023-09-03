@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class Auth {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
@@ -29,5 +30,7 @@ class Auth {
 
   Future<void> signOut() async {
     await _firebaseAuth.signOut();
+    // final Box _boxLogin = await Hive.openBox("login");
+    // await _boxLogin.put("loginStatus", false);
   }
 }

@@ -10,10 +10,16 @@ import 'overallReport.dart';
 
 class Home extends StatelessWidget {
   Home({Key? key}) : super(key: key);
+
   final Box _boxLogin = Hive.box("login");
   final User? user = Auth().currentUser;
+
   Future<void> signOut() async {
     await Auth().signOut();
+  }
+
+  Widget _title() {
+    return const Text('Firebas Auth');
   }
 
   Widget _userUid() {
@@ -39,8 +45,10 @@ class Home extends StatelessWidget {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.primaryContainer,
       appBar: AppBar(
-        title: const Center(
-          child: Text("\t\t\t\t Home"),
+        title: Row(
+          children: <Widget>[
+            _userUid(),
+          ],
         ),
         elevation: 0,
         actions: [
@@ -53,9 +61,10 @@ class Home extends StatelessWidget {
               ),
               child: IconButton(
                 onPressed: () {
+                  Auth().signOut();
                   signOut;
-                  _boxLogin.clear();
-                  _boxLogin.put("loginStatus", false);
+                  // _boxLogin.clear();
+                  // _boxLogin.put("loginStatus", false);
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(

@@ -25,7 +25,7 @@ class _LoginState extends State<Login> {
 
   bool _obscurePassword = true;
   final Box _boxLogin = Hive.box("login");
-  final Box _boxAccounts = Hive.box("accounts");
+  // final Box _boxAccounts = Hive.box("accounts");
 
   String? errorMessage = '';
   bool isLogin = true;
@@ -33,16 +33,28 @@ class _LoginState extends State<Login> {
   final TextEditingController _controllerEmail = TextEditingController();
   final TextEditingController _controllerPassword = TextEditingController();
 
-  Future<void> signInWithEmailAndPassword() async {
+  Future<void> signInWithEmailAndPassword(BuildContext context) async {
     try {
       await Auth().signInWithEmailAndPassword(
         email: _controllerEmail.text,
-        password: _controllerPassword.text,
+        password: _controllerPassword.text.toString(),
+      );
+      // final Box _boxLogin = await Hive.openBox("login");
+      // await _boxLogin.put("loginStatus", true);
+      //print("Login successful");
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              Home(), // Navigate to Home upon successful login.
+        ),
       );
     } on FirebaseAuthException catch (e) {
-      setState(() {
-        errorMessage = e.message;
-      });
+      setState(
+        () {
+          errorMessage = e.message;
+        },
+      );
     }
   }
 
@@ -81,8 +93,13 @@ class _LoginState extends State<Login> {
 
   Widget _submitButton() {
     return ElevatedButton(
-      onPressed:
-          isLogin ? signInWithEmailAndPassword : createUserWithEmailPasseord,
+      onPressed: () {
+        if (isLogin) {
+          signInWithEmailAndPassword(context);
+        } else {
+          createUserWithEmailPasseord();
+        }
+      },
       child: Text(isLogin ? 'Login' : 'Register'),
     );
   }
