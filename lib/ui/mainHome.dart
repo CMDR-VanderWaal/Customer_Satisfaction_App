@@ -97,12 +97,10 @@ class Home extends StatelessWidget {
             children: [
               SizedBox(
                 width: width * 0.29,
-                width: width * 0.29,
                 height: height * 0.25,
                 child: Center(
                   child: Text(
                     'Welcome Employee name',
-                    style: TextStyle(fontSize: height / 25),
                     style: TextStyle(fontSize: height / 25),
                     textAlign: TextAlign.center,
                   ),
