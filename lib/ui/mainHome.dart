@@ -3,8 +3,14 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:login_flutter/ui/overallReport.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:login_flutter/auth.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:login_flutter/ui/overallReport.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:login_flutter/auth.dart';
 
 import "login.dart";
+import 'customerWise.dart';
+import 'overallReport.dart';
 import 'customerWise.dart';
 import 'overallReport.dart';
 
@@ -91,10 +97,12 @@ class Home extends StatelessWidget {
             children: [
               SizedBox(
                 width: width * 0.29,
+                width: width * 0.29,
                 height: height * 0.25,
                 child: Center(
                   child: Text(
                     'Welcome Employee name',
+                    style: TextStyle(fontSize: height / 25),
                     style: TextStyle(fontSize: height / 25),
                     textAlign: TextAlign.center,
                   ),
@@ -116,6 +124,15 @@ class Home extends StatelessWidget {
                           ),
                         ),
                         onPressed: () {
+                          //print('Row Button 1');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return const CustomerWise();
+                              },
+                            ),
+                          );
                           //print('Row Button 1');
                           Navigator.push(
                             context,
@@ -147,6 +164,15 @@ class Home extends StatelessWidget {
                           ),
                         ),
                         onPressed: () {
+                          //print('Row Button 2');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return const OverallReport();
+                              },
+                            ),
+                          );
                           //print('Row Button 2');
                           Navigator.push(
                             context,
