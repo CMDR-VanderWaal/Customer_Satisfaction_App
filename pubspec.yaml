@@ -13,6 +13,8 @@ dependencies:
   hive_flutter: ^1.1.0
   firebase_core: ^2.15.1
   firebase_auth: ^4.8.0
+  http: ^0.13.3
+  syncfusion_flutter_charts: ^23.1.40
 
 dev_dependencies:
   flutter_test:

@@ -13,6 +13,7 @@ import 'customerWise.dart';
 import 'overallReport.dart';
 import 'customerWise.dart';
 import 'overallReport.dart';
+import 'dateSelect.dart';
 
 class Home extends StatelessWidget {
   Home({Key? key}) : super(key: key);
@@ -41,6 +42,7 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String? username = user?.email;
     double width = (MediaQuery.of(context).size.height);
     double height = (MediaQuery.of(context).size.height);
     double containerWidth = 0.45 * width;
@@ -51,9 +53,9 @@ class Home extends StatelessWidget {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.primaryContainer,
       appBar: AppBar(
-        title: Row(
+        title: const Row(
           children: <Widget>[
-            _userUid(),
+            Text('HOME'),
           ],
         ),
         elevation: 0,
@@ -100,8 +102,8 @@ class Home extends StatelessWidget {
                 height: height * 0.25,
                 child: Center(
                   child: Text(
-                    'Welcome Employee name',
-                    style: TextStyle(fontSize: height / 25),
+                    'Welcome \n ${username}',
+                    style: TextStyle(fontSize: height / 35),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -127,22 +129,13 @@ class Home extends StatelessWidget {
                             context,
                             MaterialPageRoute(
                               builder: (context) {
-                                return const CustomerWise();
-                              },
-                            ),
-                          );
-                          //print('Row Button 1');
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) {
-                                return const CustomerWise();
+                                return const DateSelector();
                               },
                             ),
                           );
                         },
                         child: Text(
-                          'Customer Wise Report',
+                          'Date Wise Report',
                           style: TextStyle(fontSize: buttonFontSize * .35),
                           textAlign: TextAlign.center,
                         ),
@@ -171,19 +164,10 @@ class Home extends StatelessWidget {
                               },
                             ),
                           );
-                          //print('Row Button 2');
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) {
-                                return const OverallReport();
-                              },
-                            ),
-                          );
                         },
                         child: Text(
                           "Overall Report",
-                          style: TextStyle(fontSize: buttonFontSize * 0.5),
+                          style: TextStyle(fontSize: buttonFontSize * 0.25),
                         ),
                       ),
                     ),
@@ -202,9 +186,17 @@ class Home extends StatelessWidget {
                   ),
                   onPressed: () {
                     print('Row Button 3');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return const CustomerWise();
+                        },
+                      ),
+                    );
                   },
                   child: Text(
-                    'Forgot what this did',
+                    'Customer Wise Report',
                     style: TextStyle(fontSize: buttonFontSize * 0.5),
                     textAlign: TextAlign.center,
                   ),
