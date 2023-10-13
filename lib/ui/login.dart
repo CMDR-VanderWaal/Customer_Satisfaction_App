@@ -87,6 +87,19 @@ class _LoginState extends State<Login> {
     );
   }
 
+  Widget _passwordField(
+    String title,
+    TextEditingController controller,
+  ) {
+    return TextField(
+      controller: controller,
+      obscureText: true,
+      decoration: InputDecoration(
+        labelText: title,
+      ),
+    );
+  }
+
   Widget _errorMessage() {
     return Text(errorMessage == '' ? '' : 'Humm ? $errorMessage');
   }
@@ -165,7 +178,8 @@ class _LoginState extends State<Login> {
               //   },
               // ),
               _entryField('Email', _controllerEmail),
-              _entryField('Password', _controllerPassword),
+              _passwordField('Password', _controllerPassword),
+
               const SizedBox(height: 10),
               // TextFormField(
               //   controller: _controllerPassword,

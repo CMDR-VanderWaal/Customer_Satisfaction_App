@@ -55,53 +55,55 @@ class _CustomerWiseState extends State<CustomerWise> {
           ? const Center(
               child: CircularProgressIndicator(),
             )
-          : Column(
-              children: [
-                Center(
-                  child: DataTable(
-                    columns: const [
-                      DataColumn(label: Text('Customer ID')),
-                      DataColumn(label: Text('Customer Name')),
-                      DataColumn(label: Text('Report')),
-                    ],
-                    rows: customers.map((customer) {
-                      return DataRow(
-                        cells: [
-                          DataCell(
-                              Text(customer['customerId'] ?? 'Unknown ID')),
-                          DataCell(Text(
-                              customer['customerName'] ?? 'Unknown Customer')),
-                          DataCell(ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              minimumSize: const Size.fromHeight(30),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(2),
+          : SingleChildScrollView(
+              child: Column(
+                children: [
+                  Center(
+                    child: DataTable(
+                      columns: const [
+                        DataColumn(label: Text('Customer ID')),
+                        DataColumn(label: Text('Customer Name')),
+                        DataColumn(label: Text('Report')),
+                      ],
+                      rows: customers.map((customer) {
+                        return DataRow(
+                          cells: [
+                            DataCell(
+                                Text(customer['customerId'] ?? 'Unknown ID')),
+                            DataCell(Text(customer['customerName'] ??
+                                'Unknown Customer')),
+                            DataCell(ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: const Size.fromHeight(30),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
                               ),
-                            ),
-                            onPressed: () {
-                              print('View Report');
-                              Navigator.push(context, MaterialPageRoute(
-                                builder: (context) {
-                                  return CustomerEmotionStats(
-                                    customerId:
-                                        customer['customerId'] ?? 'UnknownID',
-                                    customerName: customer['customerName'] ??
-                                        'Unknown Name',
-                                  );
-                                },
-                              ));
-                            },
-                            child: const Icon(
-                              Icons.search,
-                              size: 15,
-                            ),
-                          ))
-                        ],
-                      );
-                    }).toList(),
+                              onPressed: () {
+                                print('View Report');
+                                Navigator.push(context, MaterialPageRoute(
+                                  builder: (context) {
+                                    return CustomerEmotionStats(
+                                      customerId:
+                                          customer['customerId'] ?? 'UnknownID',
+                                      customerName: customer['customerName'] ??
+                                          'Unknown Name',
+                                    );
+                                  },
+                                ));
+                              },
+                              child: const Icon(
+                                Icons.search,
+                                size: 15,
+                              ),
+                            ))
+                          ],
+                        );
+                      }).toList(),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
     );
   }

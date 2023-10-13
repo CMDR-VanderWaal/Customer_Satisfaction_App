@@ -99,7 +99,7 @@ class Home extends StatelessWidget {
             children: [
               SizedBox(
                 width: width * 0.29,
-                height: height * 0.25,
+                height: height * 0.22,
                 child: Center(
                   child: Text(
                     'Welcome \n ${username}',
@@ -136,14 +136,14 @@ class Home extends StatelessWidget {
                         },
                         child: Text(
                           'Date Wise Report',
-                          style: TextStyle(fontSize: buttonFontSize * .35),
+                          style: TextStyle(fontSize: buttonFontSize * .30),
                           textAlign: TextAlign.center,
                         ),
                       ),
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(7.0),
                     child: SizedBox(
                       height: rowButtonH,
                       width: rowButtonW,
@@ -167,7 +167,8 @@ class Home extends StatelessWidget {
                         },
                         child: Text(
                           "Overall Report",
-                          style: TextStyle(fontSize: buttonFontSize * 0.25),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: buttonFontSize * 0.30),
                         ),
                       ),
                     ),
@@ -197,7 +198,7 @@ class Home extends StatelessWidget {
                   },
                   child: Text(
                     'Customer Wise Report',
-                    style: TextStyle(fontSize: buttonFontSize * 0.5),
+                    style: TextStyle(fontSize: buttonFontSize * 0.4),
                     textAlign: TextAlign.center,
                   ),
                 ),
