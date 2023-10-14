@@ -15,7 +15,7 @@ dependencies:
   firebase_auth: ^4.8.0
   http: ^0.13.3
   syncfusion_flutter_charts: ^23.1.40
-  intl: ^0.17.0
+  intl: ^0.18.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
