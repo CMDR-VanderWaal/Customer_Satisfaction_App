@@ -201,40 +201,43 @@ class _DateSelectorState extends State<DateSelector> {
           final List<String> dateLabels = data.keys.toList();
           final List<Map<String, double>> seriesData = data.values.toList();
 
-          return SfCartesianChart(
-            title: ChartTitle(text: 'Emotion Percentages Over Time'),
-            primaryXAxis: CategoryAxis(
-              title: AxisTitle(text: 'Date'),
-              labelRotation: -45,
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: SfCartesianChart(
+              title: ChartTitle(text: 'Emotion Percentages Over Time'),
+              primaryXAxis: CategoryAxis(
+                title: AxisTitle(text: 'Date'),
+                labelRotation: -45,
+              ),
+              primaryYAxis: NumericAxis(
+                title: AxisTitle(text: 'Percentage'),
+              ),
+              legend: Legend(isVisible: true),
+              series: <ChartSeries<Map<String, double>, String>>[
+                StackedColumn100Series<Map<String, double>, String>(
+                  dataSource: seriesData,
+                  xValueMapper: (datum, _) =>
+                      dateLabels[seriesData.indexOf(datum)],
+                  yValueMapper: (datum, _) => datum['Happy'] ?? 0.0,
+                  name: 'Happy',
+                ),
+                StackedColumn100Series<Map<String, double>, String>(
+                  dataSource: seriesData,
+                  xValueMapper: (datum, _) =>
+                      dateLabels[seriesData.indexOf(datum)],
+                  yValueMapper: (datum, _) => datum['Angry'] ?? 0.0,
+                  name: 'Angry',
+                ),
+                StackedColumn100Series<Map<String, double>, String>(
+                  dataSource: seriesData,
+                  xValueMapper: (datum, _) =>
+                      dateLabels[seriesData.indexOf(datum)],
+                  yValueMapper: (datum, _) => datum['Suprised'] ?? 0.0,
+                  name: 'Suprised',
+                ),
+                // Add more StackedColumn100Series for other emotions here
+              ],
             ),
-            primaryYAxis: NumericAxis(
-              title: AxisTitle(text: 'Percentage'),
-            ),
-            legend: Legend(isVisible: true),
-            series: <ChartSeries<Map<String, double>, String>>[
-              StackedColumn100Series<Map<String, double>, String>(
-                dataSource: seriesData,
-                xValueMapper: (datum, _) =>
-                    dateLabels[seriesData.indexOf(datum)],
-                yValueMapper: (datum, _) => datum['Happy'] ?? 0.0,
-                name: 'Happy',
-              ),
-              StackedColumn100Series<Map<String, double>, String>(
-                dataSource: seriesData,
-                xValueMapper: (datum, _) =>
-                    dateLabels[seriesData.indexOf(datum)],
-                yValueMapper: (datum, _) => datum['Angry'] ?? 0.0,
-                name: 'Angry',
-              ),
-              StackedColumn100Series<Map<String, double>, String>(
-                dataSource: seriesData,
-                xValueMapper: (datum, _) =>
-                    dateLabels[seriesData.indexOf(datum)],
-                yValueMapper: (datum, _) => datum['Suprised'] ?? 0.0,
-                name: 'Suprised',
-              ),
-              // Add more StackedColumn100Series for other emotions here
-            ],
           );
         } else {
           return Text('No data available');
