@@ -16,6 +16,7 @@ dependencies:
   http: ^0.13.3
   syncfusion_flutter_charts: ^23.1.40
   intl: ^0.18.0
+  fl_chart: ^0.40.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -38,9 +38,9 @@ class _CustomerEmotionStatsState extends State<CustomerEmotionStats> {
 
   Future<void> fetchEmotionPercents() async {
     final response = await http.get(Uri.parse(
-        'https://us-central1-sensorsprok.cloudfunctions.net/api/api/customer-satisfaction-data/customer/${widget.customerName}'));
-    //print('Response status: ${response.statusCode}');
-    //print('Response body: ${response.body}');
+        'https://us-central1-sensorsprok.cloudfunctions.net/api/api/customers/specific/${widget.customerId}'));
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
     if (response.statusCode == 200) {
       final Map<String, dynamic> emotionData = json.decode(response.body);
       //final Map<String, double> rawEmotionPercents =

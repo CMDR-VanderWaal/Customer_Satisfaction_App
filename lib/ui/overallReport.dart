@@ -21,7 +21,7 @@ class _OverallReportState extends State<OverallReport> {
 
   Future<void> fetchData() async {
     final response = await http.get(Uri.parse(
-        "https://us-central1-sensorsprok.cloudfunctions.net/api/api/customer-satisfaction-data/customers/overallSatisfaction"));
+        "https://us-central1-sensorsprok.cloudfunctions.net/api/api/overall-satisfaction/"));
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       setState(() {
