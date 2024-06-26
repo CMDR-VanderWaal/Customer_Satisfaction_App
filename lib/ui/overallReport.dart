@@ -13,7 +13,10 @@ class OverallReport extends StatefulWidget {
 
 class _OverallReportState extends State<OverallReport> {
   List<ChartData> weightedEmotionData = [];
+  List<ChartData> filteredData = [];
   double overallSentimentScore = 0.0;
+  DateTime? startDate;
+  DateTime? endDate;
 
   @override
   void initState() {
@@ -36,8 +39,41 @@ class _OverallReportState extends State<OverallReport> {
                 ))
             .toList();
 
+        filteredData = List.from(weightedEmotionData);
+
         overallSentimentScore = double.parse(data['overallSentimentScore']);
       });
+    }
+  }
+
+  void filterDataByDateRange() {
+    if (startDate != null && endDate != null) {
+      setState(() {
+        filteredData = weightedEmotionData.where((data) {
+          DateTime dataDate = DateTime.parse(data.date);
+          return dataDate.isAfter(startDate!) && dataDate.isBefore(endDate!);
+        }).toList();
+      });
+    } else {
+      setState(() {
+        filteredData = List.from(weightedEmotionData);
+      });
+    }
+  }
+
+  Future<void> _selectDateRange(BuildContext context) async {
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+
+    if (picked != null && picked.start != startDate && picked.end != endDate) {
+      setState(() {
+        startDate = picked.start;
+        endDate = picked.end;
+      });
+      filterDataByDateRange();
     }
   }
 
@@ -66,6 +102,10 @@ class _OverallReportState extends State<OverallReport> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              ElevatedButton(
+                onPressed: () => _selectDateRange(context),
+                child: const Text("Select Date Range"),
+              ),
               const Text(
                 "Weighted Emotion Percentages Over Time",
                 textAlign: TextAlign.center,
@@ -79,10 +119,11 @@ class _OverallReportState extends State<OverallReport> {
                   legend: Legend(
                     isVisible: true,
                     position: LegendPosition.bottom,
+                    overflowMode: LegendItemOverflowMode.wrap,
                   ),
                   series: <ChartSeries>[
                     LineSeries<ChartData, DateTime>(
-                      dataSource: weightedEmotionData,
+                      dataSource: filteredData,
                       xValueMapper: (ChartData data, _) =>
                           DateTime.parse(data.date),
                       yValueMapper: (ChartData data, _) =>
@@ -90,7 +131,7 @@ class _OverallReportState extends State<OverallReport> {
                       name: 'Happy',
                     ),
                     LineSeries<ChartData, DateTime>(
-                      dataSource: weightedEmotionData,
+                      dataSource: filteredData,
                       xValueMapper: (ChartData data, _) =>
                           DateTime.parse(data.date),
                       yValueMapper: (ChartData data, _) =>
@@ -98,7 +139,7 @@ class _OverallReportState extends State<OverallReport> {
                       name: 'Neutral',
                     ),
                     LineSeries<ChartData, DateTime>(
-                      dataSource: weightedEmotionData,
+                      dataSource: filteredData,
                       xValueMapper: (ChartData data, _) =>
                           DateTime.parse(data.date),
                       yValueMapper: (ChartData data, _) =>
@@ -106,7 +147,7 @@ class _OverallReportState extends State<OverallReport> {
                       name: 'Surprised',
                     ),
                     LineSeries<ChartData, DateTime>(
-                      dataSource: weightedEmotionData,
+                      dataSource: filteredData,
                       xValueMapper: (ChartData data, _) =>
                           DateTime.parse(data.date),
                       yValueMapper: (ChartData data, _) =>
@@ -114,7 +155,7 @@ class _OverallReportState extends State<OverallReport> {
                       name: 'Fearful',
                     ),
                     LineSeries<ChartData, DateTime>(
-                      dataSource: weightedEmotionData,
+                      dataSource: filteredData,
                       xValueMapper: (ChartData data, _) =>
                           DateTime.parse(data.date),
                       yValueMapper: (ChartData data, _) =>
@@ -122,7 +163,7 @@ class _OverallReportState extends State<OverallReport> {
                       name: 'Angry',
                     ),
                     LineSeries<ChartData, DateTime>(
-                      dataSource: weightedEmotionData,
+                      dataSource: filteredData,
                       xValueMapper: (ChartData data, _) =>
                           DateTime.parse(data.date),
                       yValueMapper: (ChartData data, _) =>
@@ -130,7 +171,7 @@ class _OverallReportState extends State<OverallReport> {
                       name: 'Sad',
                     ),
                     LineSeries<ChartData, DateTime>(
-                      dataSource: weightedEmotionData,
+                      dataSource: filteredData,
                       xValueMapper: (ChartData data, _) =>
                           DateTime.parse(data.date),
                       yValueMapper: (ChartData data, _) =>

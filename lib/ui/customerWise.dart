@@ -12,11 +12,21 @@ class CustomerWise extends StatefulWidget {
 
 class _CustomerWiseState extends State<CustomerWise> {
   List<Map<String, dynamic>> customers = [];
+  List<Map<String, dynamic>> filteredCustomers = [];
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
     fetchCustomers();
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> fetchCustomers() async {
@@ -28,6 +38,7 @@ class _CustomerWiseState extends State<CustomerWise> {
         final List<dynamic> customerList = json.decode(response.body);
         setState(() {
           customers = List<Map<String, dynamic>>.from(customerList);
+          filteredCustomers = customers;
         });
       } else {
         throw Exception(
@@ -37,6 +48,16 @@ class _CustomerWiseState extends State<CustomerWise> {
       print('Error fetching customers: $e');
       throw Exception('Failed to load customers: $e');
     }
+  }
+
+  void _onSearchChanged() {
+    setState(() {
+      _searchQuery = _searchController.text.toLowerCase();
+      filteredCustomers = customers.where((customer) {
+        final customerId = customer['customerId']?.toLowerCase() ?? '';
+        return customerId.contains(_searchQuery);
+      }).toList();
+    });
   }
 
   @override
@@ -58,53 +79,71 @@ class _CustomerWiseState extends State<CustomerWise> {
           )
         ],
       ),
-      body: customers.isEmpty
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
-          : SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: DataTable(
-                columns: const [
-                  DataColumn(label: Text('Customer ID')),
-                  DataColumn(label: Text('Customer Name')),
-                  DataColumn(label: Text('Report')),
-                ],
-                rows: customers.map((customer) {
-                  return DataRow(
-                    cells: [
-                      DataCell(Text(customer['customerId'] ?? 'Unknown ID')),
-                      DataCell(
-                          Text(customer['customerName'] ?? 'Unknown Customer')),
-                      DataCell(ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size.fromHeight(30),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(
-                            builder: (context) {
-                              return CustomerEmotionStats(
-                                customerId:
-                                    customer['customerId'] ?? 'UnknownID',
-                                customerName:
-                                    customer['customerName'] ?? 'Unknown Name',
-                              );
-                            },
-                          ));
-                        },
-                        child: const Icon(
-                          Icons.search,
-                          size: 15,
-                        ),
-                      ))
-                    ],
-                  );
-                }).toList(),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                labelText: 'Search by Customer ID',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.search),
               ),
             ),
+          ),
+          Expanded(
+            child: filteredCustomers.isEmpty
+                ? const Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: DataTable(
+                      columns: const [
+                        DataColumn(label: Text('Customer ID')),
+                        DataColumn(label: Text('Customer Name')),
+                        DataColumn(label: Text('Report')),
+                      ],
+                      rows: filteredCustomers.map((customer) {
+                        return DataRow(
+                          cells: [
+                            DataCell(
+                                Text(customer['customerId'] ?? 'Unknown ID')),
+                            DataCell(Text(customer['customerName'] ??
+                                'Unknown Customer')),
+                            DataCell(ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: const Size.fromHeight(30),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                              onPressed: () {
+                                Navigator.push(context, MaterialPageRoute(
+                                  builder: (context) {
+                                    return CustomerEmotionStats(
+                                      customerId:
+                                          customer['customerId'] ?? 'UnknownID',
+                                      customerName: customer['customerName'] ??
+                                          'Unknown Name',
+                                    );
+                                  },
+                                ));
+                              },
+                              child: const Icon(
+                                Icons.search,
+                                size: 15,
+                              ),
+                            )),
+                          ],
+                        );
+                      }).toList(),
+                    ),
+                  ),
+          ),
+        ],
+      ),
     );
   }
 }

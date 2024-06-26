@@ -40,6 +40,8 @@ class CustomerEmotionStats extends StatefulWidget {
 class _CustomerEmotionStatsState extends State<CustomerEmotionStats> {
   Map<String, double> emotionPercents = {};
   List<DatewiseEmotionData> datewiseData = [];
+  DateTime? startDate;
+  DateTime? endDate;
 
   @override
   void initState() {
@@ -171,6 +173,31 @@ class _CustomerEmotionStatsState extends State<CustomerEmotionStats> {
     }).toList();
   }
 
+  Future<void> _selectDateRange(BuildContext context) async {
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+
+    if (picked != null && picked.start != startDate && picked.end != endDate) {
+      setState(() {
+        startDate = picked.start;
+        endDate = picked.end;
+      });
+    }
+  }
+
+  List<DatewiseEmotionData> getFilteredDatewiseData() {
+    if (startDate != null && endDate != null) {
+      return datewiseData.where((data) {
+        return data.date.isAfter(startDate!) && data.date.isBefore(endDate!);
+      }).toList();
+    } else {
+      return datewiseData;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -178,45 +205,57 @@ class _CustomerEmotionStatsState extends State<CustomerEmotionStats> {
       appBar: AppBar(
         title: Text('Emotion Statistics - ${widget.customerName}'),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-                'Emotion Statistics for ${widget.customerName} (ID: ${widget.customerId})'),
-            const SizedBox(
-              height: 20,
-            ),
-            Container(
-              height: 300,
-              padding: EdgeInsets.all(16),
-              child: SfCartesianChart(
-                primaryXAxis: DateTimeAxis(
-                  title: AxisTitle(text: 'Date'),
-                ),
-                primaryYAxis: NumericAxis(
-                  title: AxisTitle(text: 'Weighted Emotion Percents'),
-                ),
-                legend: Legend(
-                  isVisible: true,
-                  position: LegendPosition.bottom,
-                  overflowMode: LegendItemOverflowMode.wrap,
-                ),
-                tooltipBehavior: TooltipBehavior(enable: true),
-                series: _generateLineChartSeries(datewiseData),
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                  'Emotion Statistics for ${widget.customerName} (ID: ${widget.customerId})'),
+              const SizedBox(
+                height: 20,
               ),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            Container(
-              height: 300,
-              padding: EdgeInsets.all(16),
-              child: SfCircularChart(
-                series: _generatePieChartSeries(emotionPercents),
+              ElevatedButton(
+                onPressed: () => _selectDateRange(context),
+                child: const Text('Select Date Range'),
               ),
-            ),
-          ],
+              const SizedBox(
+                height: 20,
+              ),
+              Container(
+                height: 300,
+                padding: EdgeInsets.all(16),
+                child: SfCartesianChart(
+                  primaryXAxis: DateTimeAxis(
+                    title: AxisTitle(text: 'Date'),
+                  ),
+                  primaryYAxis: NumericAxis(
+                    title: AxisTitle(text: 'Weighted Emotion Percents'),
+                  ),
+                  legend: Legend(
+                    isVisible: true,
+                    position: LegendPosition.bottom,
+                    overflowMode: LegendItemOverflowMode.wrap,
+                  ),
+                  tooltipBehavior: TooltipBehavior(enable: true),
+                  series: _generateLineChartSeries(getFilteredDatewiseData()),
+                ),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              Container(
+                height: 300,
+                padding: EdgeInsets.all(16),
+                child: SfCircularChart(
+                  series: _generatePieChartSeries(emotionPercents),
+                ),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+            ],
+          ),
         ),
       ),
     );
