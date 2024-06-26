@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 class OverallReport extends StatefulWidget {
   const OverallReport({Key? key}) : super(key: key);
@@ -11,7 +12,8 @@ class OverallReport extends StatefulWidget {
 }
 
 class _OverallReportState extends State<OverallReport> {
-  Map<String, int> chartData = {'Positive': 0, 'Neutral': 0, 'Negative': 0};
+  List<ChartData> weightedEmotionData = [];
+  double overallSentimentScore = 0.0;
 
   @override
   void initState() {
@@ -21,15 +23,20 @@ class _OverallReportState extends State<OverallReport> {
 
   Future<void> fetchData() async {
     final response = await http.get(Uri.parse(
-        "https://us-central1-sensorsprok.cloudfunctions.net/api/api/overall-satisfaction/"));
+        "https://us-central1-sensorsprok.cloudfunctions.net/api/api/overall/"));
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
+
       setState(() {
-        chartData = {
-          'Positive': data['positiveCustomers'],
-          'Neutral': data['neutralCustomers'],
-          'Negative': data['negativeCustomers']
-        };
+        weightedEmotionData = (data['data'] as List)
+            .map((item) => ChartData(
+                  date: item['date'],
+                  weightedEmotionPercents:
+                      Map<String, double>.from(item['weightedEmotionPercents']),
+                ))
+            .toList();
+
+        overallSentimentScore = double.parse(data['overallSentimentScore']);
       });
     }
   }
@@ -55,12 +62,12 @@ class _OverallReportState extends State<OverallReport> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: SizedBox(
+        child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Text(
-                "The Following Graph gives the number of Customers categorised based on their Satisfaction",
+                "Weighted Emotion Percentages Over Time",
                 textAlign: TextAlign.center,
               ),
               const SizedBox(
@@ -68,16 +75,114 @@ class _OverallReportState extends State<OverallReport> {
               ),
               Center(
                 child: SfCartesianChart(
-                  primaryXAxis: CategoryAxis(),
-                  series: <ChartSeries<dynamic, String>>[
-                    BarSeries<dynamic, String>(
-                        dataSource: chartData.entries.toList(),
-                        xValueMapper: (entry, _) => entry.key,
-                        yValueMapper: (entry, _) => entry.value,
-                        dataLabelSettings: const DataLabelSettings(
-                          isVisible: true,
-                          labelAlignment: ChartDataLabelAlignment.middle,
-                        ))
+                  primaryXAxis: DateTimeAxis(),
+                  legend: Legend(
+                    isVisible: true,
+                    position: LegendPosition.bottom,
+                  ),
+                  series: <ChartSeries>[
+                    LineSeries<ChartData, DateTime>(
+                      dataSource: weightedEmotionData,
+                      xValueMapper: (ChartData data, _) =>
+                          DateTime.parse(data.date),
+                      yValueMapper: (ChartData data, _) =>
+                          data.weightedEmotionPercents['Happy'] ?? 0,
+                      name: 'Happy',
+                    ),
+                    LineSeries<ChartData, DateTime>(
+                      dataSource: weightedEmotionData,
+                      xValueMapper: (ChartData data, _) =>
+                          DateTime.parse(data.date),
+                      yValueMapper: (ChartData data, _) =>
+                          data.weightedEmotionPercents['Neutral'] ?? 0,
+                      name: 'Neutral',
+                    ),
+                    LineSeries<ChartData, DateTime>(
+                      dataSource: weightedEmotionData,
+                      xValueMapper: (ChartData data, _) =>
+                          DateTime.parse(data.date),
+                      yValueMapper: (ChartData data, _) =>
+                          data.weightedEmotionPercents['Surprised'] ?? 0,
+                      name: 'Surprised',
+                    ),
+                    LineSeries<ChartData, DateTime>(
+                      dataSource: weightedEmotionData,
+                      xValueMapper: (ChartData data, _) =>
+                          DateTime.parse(data.date),
+                      yValueMapper: (ChartData data, _) =>
+                          data.weightedEmotionPercents['Fearful'] ?? 0,
+                      name: 'Fearful',
+                    ),
+                    LineSeries<ChartData, DateTime>(
+                      dataSource: weightedEmotionData,
+                      xValueMapper: (ChartData data, _) =>
+                          DateTime.parse(data.date),
+                      yValueMapper: (ChartData data, _) =>
+                          data.weightedEmotionPercents['Angry'] ?? 0,
+                      name: 'Angry',
+                    ),
+                    LineSeries<ChartData, DateTime>(
+                      dataSource: weightedEmotionData,
+                      xValueMapper: (ChartData data, _) =>
+                          DateTime.parse(data.date),
+                      yValueMapper: (ChartData data, _) =>
+                          data.weightedEmotionPercents['Sad'] ?? 0,
+                      name: 'Sad',
+                    ),
+                    LineSeries<ChartData, DateTime>(
+                      dataSource: weightedEmotionData,
+                      xValueMapper: (ChartData data, _) =>
+                          DateTime.parse(data.date),
+                      yValueMapper: (ChartData data, _) =>
+                          data.weightedEmotionPercents['Disgusted'] ?? 0,
+                      name: 'Disgusted',
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(
+                height: 50,
+              ),
+              const Text(
+                "Overall Sentiment Score",
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(
+                height: 50,
+              ),
+              Center(
+                child: SfRadialGauge(
+                  axes: <RadialAxis>[
+                    RadialAxis(
+                      minimum: -100,
+                      maximum: 100,
+                      ranges: <GaugeRange>[
+                        GaugeRange(
+                          startValue: -100,
+                          endValue: 0,
+                          color: Colors.red,
+                        ),
+                        GaugeRange(
+                          startValue: 0,
+                          endValue: 100,
+                          color: Colors.green,
+                        ),
+                      ],
+                      pointers: <GaugePointer>[
+                        NeedlePointer(value: overallSentimentScore),
+                      ],
+                      annotations: <GaugeAnnotation>[
+                        GaugeAnnotation(
+                          widget: Text(
+                            overallSentimentScore.toString(),
+                            style: const TextStyle(
+                                fontSize: 25, fontWeight: FontWeight.bold),
+                          ),
+                          angle: 90,
+                          positionFactor: 0.5,
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -87,4 +192,11 @@ class _OverallReportState extends State<OverallReport> {
       ),
     );
   }
+}
+
+class ChartData {
+  final String date;
+  final Map<String, double> weightedEmotionPercents;
+
+  ChartData({required this.date, required this.weightedEmotionPercents});
 }

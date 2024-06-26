@@ -14,7 +14,10 @@ dependencies:
   firebase_core: ^2.15.1
   firebase_auth: ^4.8.0
   http: ^0.13.3
+  syncfusion_flutter_core: ^23.1.40
   syncfusion_flutter_charts: ^23.1.40
+  syncfusion_flutter_gauges: ^23.1.40
+
   intl: ^0.18.0
   fl_chart: ^0.40.0
 dev_dependencies:

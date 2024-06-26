@@ -25,6 +25,7 @@ class _DateSelectorState extends State<DateSelector> {
 
   String FormattedStart = "no date";
   String FormattedEnd = "not date";
+
   Future<void> _pickInitialDate(BuildContext context) async {
     final DateTime? Ipicked = await showDatePicker(
       context: context,
@@ -142,7 +143,7 @@ class _DateSelectorState extends State<DateSelector> {
               child: Column(
                 children: [
                   Text('100% Stacked Column Chart'),
-                  _buildStackedColumnChart(), // Add the chart here
+                  _buildStackedColumnChart(),
                 ],
               ),
             ),
@@ -201,6 +202,12 @@ class _DateSelectorState extends State<DateSelector> {
           final List<String> dateLabels = data.keys.toList();
           final List<Map<String, double>> seriesData = data.values.toList();
 
+          // Collect all unique emotions
+          final Set<String> allEmotions = {};
+          for (var emotionData in seriesData) {
+            allEmotions.addAll(emotionData.keys);
+          }
+
           return SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: SfCartesianChart(
@@ -212,31 +219,19 @@ class _DateSelectorState extends State<DateSelector> {
               primaryYAxis: NumericAxis(
                 title: AxisTitle(text: 'Percentage'),
               ),
-              legend: Legend(isVisible: true),
-              series: <ChartSeries<Map<String, double>, String>>[
-                StackedColumn100Series<Map<String, double>, String>(
+              legend: Legend(
+                isVisible: true,
+                position: LegendPosition.bottom,
+              ),
+              series: allEmotions.map((emotion) {
+                return StackedColumn100Series<Map<String, double>, String>(
                   dataSource: seriesData,
                   xValueMapper: (datum, _) =>
                       dateLabels[seriesData.indexOf(datum)],
-                  yValueMapper: (datum, _) => datum['Happy'] ?? 0.0,
-                  name: 'Happy',
-                ),
-                StackedColumn100Series<Map<String, double>, String>(
-                  dataSource: seriesData,
-                  xValueMapper: (datum, _) =>
-                      dateLabels[seriesData.indexOf(datum)],
-                  yValueMapper: (datum, _) => datum['Angry'] ?? 0.0,
-                  name: 'Angry',
-                ),
-                StackedColumn100Series<Map<String, double>, String>(
-                  dataSource: seriesData,
-                  xValueMapper: (datum, _) =>
-                      dateLabels[seriesData.indexOf(datum)],
-                  yValueMapper: (datum, _) => datum['Suprised'] ?? 0.0,
-                  name: 'Suprised',
-                ),
-                // Add more StackedColumn100Series for other emotions here
-              ],
+                  yValueMapper: (datum, _) => datum[emotion] ?? 0.0,
+                  name: emotion,
+                );
+              }).toList(),
             ),
           );
         } else {
@@ -250,28 +245,30 @@ class _DateSelectorState extends State<DateSelector> {
       String startDate, String endDate) async {
     String formattedStartDate = formatDate(startDate);
     String formattedEndDate = formatDate(endDate);
-
+    print(
+        'sending request https://us-central1-sensorsprok.cloudfunctions.net/api/api/date-range/$formattedStartDate/$formattedEndDate \n');
     final response = await http.get(Uri.parse(
-        'https://us-central1-sensorsprok.cloudfunctions.net/api/api/customer-satisfaction-data/date/$formattedStartDate/$formattedEndDate')); // Replace with your API endpoint
+        'https://us-central1-sensorsprok.cloudfunctions.net/api/api/date-range/$formattedStartDate/$formattedEndDate')); // Replace with your API endpoint
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> responseData = json.decode(response.body);
-      final Map<String, Map<String, double>> emotionPercents = {};
+      final Map<String, Map<String, double>> weightedEmotionPercents = {};
 
-      responseData['emotionPercents'].forEach((date, emotions) {
+      responseData['weightedEmotionPercents'].forEach((date, emotions) {
         final Map<String, double> emotionPercentMap = {};
         emotions.forEach((emotion, percent) {
           emotionPercentMap[emotion] = double.parse(percent.toString());
         });
-        emotionPercents[date] = emotionPercentMap;
+        weightedEmotionPercents[date] = emotionPercentMap;
       });
 
-      return emotionPercents;
+      return weightedEmotionPercents;
     } else {
       throw Exception('Failed to load data');
     }
   }
 }
+
 
 // import 'package:flutter/material.dart';
 // import 'package:hive_flutter/hive_flutter.dart';

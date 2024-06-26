@@ -13,6 +13,16 @@ class EmotionData {
   });
 }
 
+class DatewiseEmotionData {
+  final DateTime date;
+  final Map<String, double> weightedEmotionPercents;
+
+  DatewiseEmotionData({
+    required this.date,
+    required this.weightedEmotionPercents,
+  });
+}
+
 class CustomerEmotionStats extends StatefulWidget {
   final String customerId;
   final String customerName;
@@ -29,6 +39,7 @@ class CustomerEmotionStats extends StatefulWidget {
 
 class _CustomerEmotionStatsState extends State<CustomerEmotionStats> {
   Map<String, double> emotionPercents = {};
+  List<DatewiseEmotionData> datewiseData = [];
 
   @override
   void initState() {
@@ -42,14 +53,13 @@ class _CustomerEmotionStatsState extends State<CustomerEmotionStats> {
     print('Response status: ${response.statusCode}');
     print('Response body: ${response.body}');
     if (response.statusCode == 200) {
-      final Map<String, dynamic> emotionData = json.decode(response.body);
-      //final Map<String, double> rawEmotionPercents =
-      //emotionData['emotionPercents'];
-      final updatedEmotionPercents = <String, double>{};
+      final Map<String, dynamic> responseData = json.decode(response.body);
 
-      if (emotionData['emotionPercents'] != null) {
+      // Parse overall emotion percentages
+      final Map<String, double> updatedEmotionPercents = {};
+      if (responseData['emotionPercents'] != null) {
         final Map<String, dynamic> rawEmotionPercents =
-            emotionData['emotionPercents'];
+            responseData['emotionPercents'];
         rawEmotionPercents.forEach((key, value) {
           if (value is num) {
             updatedEmotionPercents[key] = value.toDouble();
@@ -58,9 +68,35 @@ class _CustomerEmotionStatsState extends State<CustomerEmotionStats> {
           }
         });
       }
+
+      // Parse datewise emotion percentages
+      final List<DatewiseEmotionData> updatedDatewiseData = [];
+      if (responseData['data'] != null) {
+        final List<dynamic> rawData = responseData['data'];
+        rawData.forEach((datewiseEntry) {
+          final DateTime date = DateTime.parse(datewiseEntry['date']);
+          final Map<String, double> weightedEmotionPercents = {};
+          final Map<String, dynamic> rawWeightedPercents =
+              datewiseEntry['weightedEmotionPercents'];
+          rawWeightedPercents.forEach((key, value) {
+            if (value is num) {
+              weightedEmotionPercents[key] = value.toDouble();
+            } else if (value is double) {
+              weightedEmotionPercents[key] = value;
+            }
+          });
+          updatedDatewiseData.add(
+            DatewiseEmotionData(
+                date: date, weightedEmotionPercents: weightedEmotionPercents),
+          );
+        });
+      }
+
       setState(() {
         emotionPercents = updatedEmotionPercents;
+        datewiseData = updatedDatewiseData;
         print('Emotion Percents: $emotionPercents');
+        print('Datewise Data: $datewiseData');
       });
     } else {
       throw Exception('Failed to load Emotion Data');
@@ -89,6 +125,52 @@ class _CustomerEmotionStatsState extends State<CustomerEmotionStats> {
     ];
   }
 
+  List<LineSeries<DatewiseEmotionData, DateTime>> _generateLineChartSeries(
+      List<DatewiseEmotionData> datewiseData) {
+    final List<String> emotions = [
+      'Neutral',
+      'Fearful',
+      'Surprised',
+      'Happy',
+      'Angry',
+      'Sad',
+    ];
+
+    // Add initial data point with all emotions set to 0
+    final initialDate = datewiseData.isNotEmpty
+        ? datewiseData.first.date.subtract(Duration(days: 1))
+        : DateTime.now();
+    final initialData = DatewiseEmotionData(
+      date: initialDate,
+      weightedEmotionPercents: {
+        'Neutral': 0.0,
+        'Fearful': 0.0,
+        'Surprised': 0.0,
+        'Happy': 0.0,
+        'Angry': 0.0,
+        'Sad': 0.0,
+      },
+    );
+
+    final List<DatewiseEmotionData> modifiedDatewiseData = [
+      initialData,
+      ...datewiseData
+    ];
+
+    return emotions.map((emotion) {
+      return LineSeries<DatewiseEmotionData, DateTime>(
+        name: emotion,
+        dataSource: modifiedDatewiseData,
+        xValueMapper: (DatewiseEmotionData data, _) => data.date,
+        yValueMapper: (DatewiseEmotionData data, _) =>
+            data.weightedEmotionPercents[emotion] ?? 0,
+        dataLabelSettings: DataLabelSettings(
+          isVisible: false,
+        ),
+      );
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -97,19 +179,46 @@ class _CustomerEmotionStatsState extends State<CustomerEmotionStats> {
         title: Text('Emotion Statistics - ${widget.customerName}'),
       ),
       body: Center(
-          child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-              'Emotion Statistics for ${widget.customerName} (ID : ${widget.customerId})'),
-          const SizedBox(
-            height: 20,
-          ),
-          SfCircularChart(
-            series: _generatePieChartSeries(emotionPercents),
-          )
-        ],
-      )),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+                'Emotion Statistics for ${widget.customerName} (ID: ${widget.customerId})'),
+            const SizedBox(
+              height: 20,
+            ),
+            Container(
+              height: 300,
+              padding: EdgeInsets.all(16),
+              child: SfCartesianChart(
+                primaryXAxis: DateTimeAxis(
+                  title: AxisTitle(text: 'Date'),
+                ),
+                primaryYAxis: NumericAxis(
+                  title: AxisTitle(text: 'Weighted Emotion Percents'),
+                ),
+                legend: Legend(
+                  isVisible: true,
+                  position: LegendPosition.bottom,
+                  overflowMode: LegendItemOverflowMode.wrap,
+                ),
+                tooltipBehavior: TooltipBehavior(enable: true),
+                series: _generateLineChartSeries(datewiseData),
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Container(
+              height: 300,
+              padding: EdgeInsets.all(16),
+              child: SfCircularChart(
+                series: _generatePieChartSeries(emotionPercents),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
