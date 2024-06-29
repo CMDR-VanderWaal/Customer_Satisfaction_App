@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class EmotionData {
   final String emotion;
@@ -50,8 +51,11 @@ class _CustomerEmotionStatsState extends State<CustomerEmotionStats> {
   }
 
   Future<void> fetchEmotionPercents() async {
+    final box = await Hive.openBox('login');
+    String? storeId = box.get('storeId');
+
     final response = await http.get(Uri.parse(
-        'https://us-central1-sensorsprok.cloudfunctions.net/api/api/customers/specific/${widget.customerId}'));
+        "https://us-central1-sensorsprok.cloudfunctions.net/api/api/customers/$storeId/specific/${widget.customerId}"));
     print('Response status: ${response.statusCode}');
     print('Response body: ${response.body}');
     if (response.statusCode == 200) {

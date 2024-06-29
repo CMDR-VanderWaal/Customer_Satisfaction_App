@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'CustomerEmotionStats.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class CustomerWise extends StatefulWidget {
   const CustomerWise({super.key});
@@ -30,9 +31,12 @@ class _CustomerWiseState extends State<CustomerWise> {
   }
 
   Future<void> fetchCustomers() async {
+    final box = await Hive.openBox('login');
+    String? storeId = box.get('storeId');
+
     try {
       final response = await http.get(Uri.parse(
-          'https://us-central1-sensorsprok.cloudfunctions.net/api/api/customers/list'));
+          'https://us-central1-sensorsprok.cloudfunctions.net/api/api/customers/$storeId/list'));
 
       if (response.statusCode == 200) {
         final List<dynamic> customerList = json.decode(response.body);

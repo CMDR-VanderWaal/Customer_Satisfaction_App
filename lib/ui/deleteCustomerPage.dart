@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class DeleteCustomerPage extends StatefulWidget {
   const DeleteCustomerPage({Key? key}) : super(key: key);
@@ -29,9 +30,12 @@ class _DeleteCustomerPageState extends State<DeleteCustomerPage> {
   }
 
   Future<void> fetchCustomers() async {
+    final box = await Hive.openBox('login');
+    String? storeId = box.get('storeId');
+
     try {
       final response = await http.get(Uri.parse(
-          'https://us-central1-sensorsprok.cloudfunctions.net/api/api/customers/list'));
+          'https://us-central1-sensorsprok.cloudfunctions.net/api/api/customers/$storeId/list'));
 
       if (response.statusCode == 200) {
         final List<dynamic> customerList = json.decode(response.body);
@@ -50,9 +54,13 @@ class _DeleteCustomerPageState extends State<DeleteCustomerPage> {
   }
 
   Future<void> deleteCustomer(String customerId) async {
+    final box = await Hive.openBox('login');
+
+    String? storeId = box.get('storeId');
+
     try {
       final response = await http.delete(Uri.parse(
-          'https://us-central1-sensorsprok.cloudfunctions.net/api/api/customers/specific/$customerId'));
+          'https://us-central1-sensorsprok.cloudfunctions.net/api/api/customers/$storeId/specific/$customerId'));
 
       if (response.statusCode == 200) {
         setState(() {

@@ -1,4 +1,5 @@
-import "package:flutter/material.dart";
+import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:syncfusion_flutter_charts/charts.dart';
@@ -17,6 +18,7 @@ class _OverallReportState extends State<OverallReport> {
   double overallSentimentScore = 0.0;
   DateTime? startDate;
   DateTime? endDate;
+  String? storeId;
 
   @override
   void initState() {
@@ -25,24 +27,33 @@ class _OverallReportState extends State<OverallReport> {
   }
 
   Future<void> fetchData() async {
-    final response = await http.get(Uri.parse(
-        "https://us-central1-sensorsprok.cloudfunctions.net/api/api/overall/"));
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
+    final box = await Hive.openBox('login');
+    setState(() {
+      storeId = box.get('storeId');
+    });
 
-      setState(() {
-        weightedEmotionData = (data['data'] as List)
-            .map((item) => ChartData(
-                  date: item['date'],
-                  weightedEmotionPercents:
-                      Map<String, double>.from(item['weightedEmotionPercents']),
-                ))
-            .toList();
-
-        filteredData = List.from(weightedEmotionData);
-
-        overallSentimentScore = double.parse(data['overallSentimentScore']);
-      });
+    try {
+      final response = await http.get(Uri.parse(
+          "https://us-central1-sensorsprok.cloudfunctions.net/api/api/overall/$storeId"));
+      print(storeId);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          weightedEmotionData = (data['data'] as List)
+              .map((item) => ChartData(
+                    date: item['date'],
+                    weightedEmotionPercents: Map<String, double>.from(
+                        item['weightedEmotionPercents']),
+                  ))
+              .toList();
+          filteredData = List.from(weightedEmotionData);
+          overallSentimentScore = double.parse(data['overallSentimentScore']);
+        });
+      } else {
+        print('Failed to load data: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching data: $e');
     }
   }
 

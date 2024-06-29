@@ -245,10 +245,15 @@ class _DateSelectorState extends State<DateSelector> {
       String startDate, String endDate) async {
     String formattedStartDate = formatDate(startDate);
     String formattedEndDate = formatDate(endDate);
+
+    final box = await Hive.openBox('login');
+
+    String? storeId = box.get('storeId');
+
     print(
-        'sending request https://us-central1-sensorsprok.cloudfunctions.net/api/api/date-range/$formattedStartDate/$formattedEndDate \n');
+        'sending request https://us-central1-sensorsprok.cloudfunctions.net/api/api/date-range/$storeId/$formattedStartDate/$formattedEndDate \n');
     final response = await http.get(Uri.parse(
-        'https://us-central1-sensorsprok.cloudfunctions.net/api/api/date-range/$formattedStartDate/$formattedEndDate')); // Replace with your API endpoint
+        "https://us-central1-sensorsprok.cloudfunctions.net/api/api/date-range/$storeId/$formattedStartDate/$formattedEndDate")); // Replace with your API endpoint
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> responseData = json.decode(response.body);
