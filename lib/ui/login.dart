@@ -48,6 +48,28 @@ class _LoginState extends State<Login> {
     }
   }
 
+  Future<void> createUserWithEmailAndPassword(BuildContext context) async {
+    try {
+      await Auth().createUserWithEmailAndPassword(
+        email: _controllerEmail.text,
+        password: _controllerPassword.text.toString(),
+      );
+
+      // Show success message and switch to login mode
+      setState(() {
+        isLogin = true;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Registration successful. Please log in.')),
+      );
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        errorMessage = e.message;
+      });
+    }
+  }
+
   Future<void> _showStoreIdDialog(BuildContext context) async {
     return showDialog(
       context: context,
@@ -112,7 +134,7 @@ class _LoginState extends State<Login> {
         if (isLogin) {
           signInWithEmailAndPassword(context);
         } else {
-          // Handle register logic if needed
+          createUserWithEmailAndPassword(context);
         }
       },
       child: Text(isLogin ? 'Login' : 'Register'),
@@ -146,12 +168,12 @@ class _LoginState extends State<Login> {
             children: [
               const SizedBox(height: 150),
               Text(
-                "Welcome back",
+                isLogin ? "Welcome back" : "Create an account",
                 style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
               Text(
-                "Login to your account",
+                isLogin ? "Login to your account" : "Register a new account",
                 style: TextStyle(fontSize: 18),
               ),
               const SizedBox(height: 60),

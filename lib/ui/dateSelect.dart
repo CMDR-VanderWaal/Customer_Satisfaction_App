@@ -222,6 +222,7 @@ class _DateSelectorState extends State<DateSelector> {
               legend: Legend(
                 isVisible: true,
                 position: LegendPosition.bottom,
+                overflowMode: LegendItemOverflowMode.wrap,
               ),
               series: allEmotions.map((emotion) {
                 return StackedColumn100Series<Map<String, double>, String>(

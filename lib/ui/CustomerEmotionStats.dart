@@ -93,7 +93,9 @@ class _CustomerEmotionStatsState extends State<CustomerEmotionStats> {
           });
           updatedDatewiseData.add(
             DatewiseEmotionData(
-                date: date, weightedEmotionPercents: weightedEmotionPercents),
+                date: DateTime(date.year, date.month,
+                    date.day), // Ensure time is set to 00:00:00
+                weightedEmotionPercents: weightedEmotionPercents),
           );
         });
       }
@@ -146,8 +148,10 @@ class _CustomerEmotionStatsState extends State<CustomerEmotionStats> {
     final initialDate = datewiseData.isNotEmpty
         ? datewiseData.first.date.subtract(Duration(days: 1))
         : DateTime.now();
+
     final initialData = DatewiseEmotionData(
-      date: initialDate,
+      date: DateTime(initialDate.year, initialDate.month,
+          initialDate.day), // Ensure time is set to 00:00:00
       weightedEmotionPercents: {
         'Neutral': 0.0,
         'Fearful': 0.0,
@@ -232,6 +236,8 @@ class _CustomerEmotionStatsState extends State<CustomerEmotionStats> {
                 child: SfCartesianChart(
                   primaryXAxis: DateTimeAxis(
                     title: AxisTitle(text: 'Date'),
+                    intervalType:
+                        DateTimeIntervalType.days, // Ensure date interval
                   ),
                   primaryYAxis: NumericAxis(
                     title: AxisTitle(text: 'Weighted Emotion Percents'),

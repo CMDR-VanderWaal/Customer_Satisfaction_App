@@ -126,7 +126,10 @@ class _OverallReportState extends State<OverallReport> {
               ),
               Center(
                 child: SfCartesianChart(
-                  primaryXAxis: DateTimeAxis(),
+                  primaryXAxis: DateTimeAxis(
+                    intervalType:
+                        DateTimeIntervalType.days, // Set interval type to days
+                  ),
                   legend: Legend(
                     isVisible: true,
                     position: LegendPosition.bottom,
