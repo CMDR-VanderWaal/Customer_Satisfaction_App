@@ -39,13 +39,21 @@ class _OverallReportState extends State<OverallReport> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
-          weightedEmotionData = (data['data'] as List)
+          List<ChartData> tempData = (data['data'] as List)
               .map((item) => ChartData(
                     date: item['date'],
                     weightedEmotionPercents: Map<String, double>.from(
                         item['weightedEmotionPercents']),
                   ))
               .toList();
+
+          // Sort data by date
+          tempData.sort((a, b) =>
+              DateTime.parse(a.date).compareTo(DateTime.parse(b.date)));
+
+          // Fill in missing dates with default values
+          weightedEmotionData = fillMissingDates(tempData);
+
           filteredData = List.from(weightedEmotionData);
           overallSentimentScore = double.parse(data['overallSentimentScore']);
         });
@@ -55,6 +63,28 @@ class _OverallReportState extends State<OverallReport> {
     } catch (e) {
       print('Error fetching data: $e');
     }
+  }
+
+  List<ChartData> fillMissingDates(List<ChartData> data) {
+    if (data.isEmpty) return data;
+    List<ChartData> filledData = [];
+    DateTime current = DateTime.parse(data.first.date);
+    DateTime end = DateTime.parse(data.last.date);
+
+    Map<String, ChartData> dataMap = {for (var item in data) item.date: item};
+
+    while (current.isBefore(end) || current.isAtSameMomentAs(end)) {
+      String dateString = current.toIso8601String().split('T')[0];
+      if (dataMap.containsKey(dateString)) {
+        filledData.add(dataMap[dateString]!);
+      } else {
+        filledData
+            .add(ChartData(date: dateString, weightedEmotionPercents: {}));
+      }
+      current = current.add(Duration(days: 1));
+    }
+
+    return filledData;
   }
 
   void filterDataByDateRange() {
@@ -127,8 +157,7 @@ class _OverallReportState extends State<OverallReport> {
               Center(
                 child: SfCartesianChart(
                   primaryXAxis: DateTimeAxis(
-                    intervalType:
-                        DateTimeIntervalType.days, // Set interval type to days
+                    intervalType: DateTimeIntervalType.days,
                   ),
                   legend: Legend(
                     isVisible: true,
@@ -143,6 +172,7 @@ class _OverallReportState extends State<OverallReport> {
                       yValueMapper: (ChartData data, _) =>
                           data.weightedEmotionPercents['Happy'] ?? 0,
                       name: 'Happy',
+                      markerSettings: MarkerSettings(isVisible: true),
                     ),
                     LineSeries<ChartData, DateTime>(
                       dataSource: filteredData,
@@ -151,6 +181,7 @@ class _OverallReportState extends State<OverallReport> {
                       yValueMapper: (ChartData data, _) =>
                           data.weightedEmotionPercents['Neutral'] ?? 0,
                       name: 'Neutral',
+                      markerSettings: MarkerSettings(isVisible: true),
                     ),
                     LineSeries<ChartData, DateTime>(
                       dataSource: filteredData,
@@ -159,6 +190,7 @@ class _OverallReportState extends State<OverallReport> {
                       yValueMapper: (ChartData data, _) =>
                           data.weightedEmotionPercents['Surprised'] ?? 0,
                       name: 'Surprised',
+                      markerSettings: MarkerSettings(isVisible: true),
                     ),
                     LineSeries<ChartData, DateTime>(
                       dataSource: filteredData,
@@ -167,6 +199,7 @@ class _OverallReportState extends State<OverallReport> {
                       yValueMapper: (ChartData data, _) =>
                           data.weightedEmotionPercents['Fearful'] ?? 0,
                       name: 'Fearful',
+                      markerSettings: MarkerSettings(isVisible: true),
                     ),
                     LineSeries<ChartData, DateTime>(
                       dataSource: filteredData,
@@ -175,6 +208,7 @@ class _OverallReportState extends State<OverallReport> {
                       yValueMapper: (ChartData data, _) =>
                           data.weightedEmotionPercents['Angry'] ?? 0,
                       name: 'Angry',
+                      markerSettings: MarkerSettings(isVisible: true),
                     ),
                     LineSeries<ChartData, DateTime>(
                       dataSource: filteredData,
@@ -183,6 +217,7 @@ class _OverallReportState extends State<OverallReport> {
                       yValueMapper: (ChartData data, _) =>
                           data.weightedEmotionPercents['Sad'] ?? 0,
                       name: 'Sad',
+                      markerSettings: MarkerSettings(isVisible: true),
                     ),
                     LineSeries<ChartData, DateTime>(
                       dataSource: filteredData,
@@ -191,6 +226,7 @@ class _OverallReportState extends State<OverallReport> {
                       yValueMapper: (ChartData data, _) =>
                           data.weightedEmotionPercents['Disgusted'] ?? 0,
                       name: 'Disgusted',
+                      markerSettings: MarkerSettings(isVisible: true),
                     ),
                   ],
                 ),

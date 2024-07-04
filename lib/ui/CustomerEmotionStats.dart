@@ -102,13 +102,45 @@ class _CustomerEmotionStatsState extends State<CustomerEmotionStats> {
 
       setState(() {
         emotionPercents = updatedEmotionPercents;
-        datewiseData = updatedDatewiseData;
+        datewiseData = fillMissingDates(updatedDatewiseData);
         print('Emotion Percents: $emotionPercents');
         print('Datewise Data: $datewiseData');
       });
     } else {
       throw Exception('Failed to load Emotion Data');
     }
+  }
+
+  List<DatewiseEmotionData> fillMissingDates(List<DatewiseEmotionData> data) {
+    if (data.isEmpty) return data;
+    List<DatewiseEmotionData> filledData = [];
+    DateTime current = data.first.date;
+    DateTime end = data.last.date;
+
+    Map<DateTime, DatewiseEmotionData> dataMap = {
+      for (var item in data) item.date: item
+    };
+
+    while (current.isBefore(end) || current.isAtSameMomentAs(end)) {
+      if (dataMap.containsKey(current)) {
+        filledData.add(dataMap[current]!);
+      } else {
+        filledData.add(DatewiseEmotionData(
+          date: current,
+          weightedEmotionPercents: {
+            'Neutral': 0.0,
+            'Fearful': 0.0,
+            'Surprised': 0.0,
+            'Happy': 0.0,
+            'Angry': 0.0,
+            'Sad': 0.0,
+          },
+        ));
+      }
+      current = current.add(Duration(days: 1));
+    }
+
+    return filledData;
   }
 
   List<PieSeries<EmotionData, String>> _generatePieChartSeries(
