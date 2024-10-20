@@ -172,7 +172,7 @@ class _OverallReportState extends State<OverallReport> {
                       yValueMapper: (ChartData data, _) =>
                           data.weightedEmotionPercents['Happy'] ?? 0,
                       name: 'Happy',
-                      markerSettings: MarkerSettings(isVisible: true),
+                      markerSettings: MarkerSettings(isVisible: false),
                     ),
                     LineSeries<ChartData, DateTime>(
                       dataSource: filteredData,
@@ -181,7 +181,7 @@ class _OverallReportState extends State<OverallReport> {
                       yValueMapper: (ChartData data, _) =>
                           data.weightedEmotionPercents['Neutral'] ?? 0,
                       name: 'Neutral',
-                      markerSettings: MarkerSettings(isVisible: true),
+                      markerSettings: MarkerSettings(isVisible: false),
                     ),
                     LineSeries<ChartData, DateTime>(
                       dataSource: filteredData,
@@ -190,7 +190,7 @@ class _OverallReportState extends State<OverallReport> {
                       yValueMapper: (ChartData data, _) =>
                           data.weightedEmotionPercents['Surprised'] ?? 0,
                       name: 'Surprised',
-                      markerSettings: MarkerSettings(isVisible: true),
+                      markerSettings: MarkerSettings(isVisible: false),
                     ),
                     LineSeries<ChartData, DateTime>(
                       dataSource: filteredData,
@@ -199,7 +199,7 @@ class _OverallReportState extends State<OverallReport> {
                       yValueMapper: (ChartData data, _) =>
                           data.weightedEmotionPercents['Fearful'] ?? 0,
                       name: 'Fearful',
-                      markerSettings: MarkerSettings(isVisible: true),
+                      markerSettings: MarkerSettings(isVisible: false),
                     ),
                     LineSeries<ChartData, DateTime>(
                       dataSource: filteredData,
@@ -208,7 +208,7 @@ class _OverallReportState extends State<OverallReport> {
                       yValueMapper: (ChartData data, _) =>
                           data.weightedEmotionPercents['Angry'] ?? 0,
                       name: 'Angry',
-                      markerSettings: MarkerSettings(isVisible: true),
+                      markerSettings: MarkerSettings(isVisible: false),
                     ),
                     LineSeries<ChartData, DateTime>(
                       dataSource: filteredData,
@@ -217,7 +217,7 @@ class _OverallReportState extends State<OverallReport> {
                       yValueMapper: (ChartData data, _) =>
                           data.weightedEmotionPercents['Sad'] ?? 0,
                       name: 'Sad',
-                      markerSettings: MarkerSettings(isVisible: true),
+                      markerSettings: MarkerSettings(isVisible: false),
                     ),
                     LineSeries<ChartData, DateTime>(
                       dataSource: filteredData,
@@ -226,7 +226,7 @@ class _OverallReportState extends State<OverallReport> {
                       yValueMapper: (ChartData data, _) =>
                           data.weightedEmotionPercents['Disgusted'] ?? 0,
                       name: 'Disgusted',
-                      markerSettings: MarkerSettings(isVisible: true),
+                      markerSettings: MarkerSettings(isVisible: false),
                     ),
                   ],
                 ),
