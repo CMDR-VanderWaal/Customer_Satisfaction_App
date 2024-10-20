@@ -19,9 +19,53 @@ class Home extends StatelessWidget {
     await Auth().signOut();
   }
 
+  Future<void> _updateStoreId(BuildContext context) async {
+    String? newStoreId;
+
+    // Show dialog to get new Store ID
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Enter New Store ID'),
+          content: TextField(
+            onChanged: (value) {
+              newStoreId = value; // Capture the new Store ID
+            },
+            decoration: InputDecoration(hintText: "New Store ID"),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                if (newStoreId != null && newStoreId!.isNotEmpty) {
+                  _boxLogin.put('storeId', newStoreId); // Update Hive box
+                  Navigator.of(context).pop(); // Close dialog
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Store ID updated to: $newStoreId'),
+                    ),
+                  );
+                }
+              },
+              child: Text('Update'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     String? username = user?.email;
+    String currentStoreId = _boxLogin.get('storeId', defaultValue: 'Not Set') ??
+        'Not Set'; // Retrieve current Store ID
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
     double containerWidth = width * 0.85;
@@ -37,6 +81,13 @@ class Home extends StatelessWidget {
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
         elevation: 0,
         actions: [
+          // Button to update Store ID
+          IconButton(
+            icon: Icon(Icons.store),
+            onPressed: () {
+              _updateStoreId(context); // Call the method to update Store ID
+            },
+          ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: DecoratedBox(
@@ -75,9 +126,11 @@ class Home extends StatelessWidget {
                 height: height * 0.15,
                 child: Center(
                   child: Text(
-                    'Welcome, $username',
+                    'Welcome to store: $currentStoreId \n$username', // Display current Store ID
                     style: TextStyle(
-                        fontSize: height / 30, fontWeight: FontWeight.w600),
+                      fontSize: height / 30,
+                      fontWeight: FontWeight.w600,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ),
