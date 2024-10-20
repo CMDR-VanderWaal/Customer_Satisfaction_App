@@ -290,6 +290,12 @@ class _CustomerEmotionStatsState extends State<CustomerEmotionStats> {
                 height: 300,
                 padding: EdgeInsets.all(16),
                 child: SfCircularChart(
+                  legend: Legend(
+                    isVisible: true, // Show legend
+                    position: LegendPosition.bottom, // Position of the legend
+                    overflowMode:
+                        LegendItemOverflowMode.wrap, // Manage overflow
+                  ),
                   series: _generatePieChartSeries(emotionPercents),
                 ),
               ),
