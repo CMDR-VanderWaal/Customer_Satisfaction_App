@@ -1,7 +1,7 @@
 name: login_flutter
 description: A flutter login model app.
 publish_to: "none"
-version: 0.1.0
+version: 1.1.1+1
 
 environment:
   sdk: ">=3.0.3 <4.0.0"
@@ -17,6 +17,7 @@ dependencies:
   syncfusion_flutter_core: ^23.1.40
   syncfusion_flutter_charts: ^23.1.40
   syncfusion_flutter_gauges: ^23.1.40
+
 
   intl: ^0.18.0
   fl_chart: ^0.40.0
