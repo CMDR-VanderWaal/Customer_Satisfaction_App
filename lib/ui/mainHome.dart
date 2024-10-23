@@ -7,7 +7,10 @@ import 'login.dart';
 import 'customerWise.dart';
 import 'overallReport.dart';
 import 'dateSelect.dart';
-import 'deleteCustomerPage.dart'; // Import the delete customer page
+import 'deleteCustomerPage.dart';
+
+import 'package:http/http.dart' as http; // For API calls
+import 'dart:convert';
 
 class Home extends StatelessWidget {
   Home({Key? key}) : super(key: key);
@@ -21,51 +24,116 @@ class Home extends StatelessWidget {
 
   Future<void> _updateStoreId(BuildContext context) async {
     String? newStoreId;
+    bool isValid = false;
+    String? errorMessage;
 
-    // Show dialog to get new Store ID
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Enter New Store ID'),
-          content: TextField(
-            onChanged: (value) {
-              newStoreId = value; // Capture the new Store ID
-            },
-            decoration: InputDecoration(hintText: "New Store ID"),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close dialog
-              },
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                if (newStoreId != null && newStoreId!.isNotEmpty) {
-                  _boxLogin.put('storeId', newStoreId); // Update Hive box
-                  Navigator.of(context).pop(); // Close dialog
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Store ID updated to: $newStoreId'),
+    // Loop until a valid store ID is entered
+    while (!isValid) {
+      // Show dialog to get new Store ID using StatefulBuilder to dynamically update the UI
+      await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return AlertDialog(
+                title: Text('Enter New Store ID'),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      onChanged: (value) {
+                        newStoreId = value; // Capture the new Store ID
+                      },
+                      decoration: InputDecoration(
+                        hintText: "New Store ID",
+                        errorText: errorMessage, // Display error message if any
+                      ),
                     ),
-                  );
-                }
-              },
-              child: Text('Update'),
-            ),
-          ],
-        );
-      },
-    );
+                    if (errorMessage != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Text(
+                          errorMessage!,
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context, rootNavigator: true).pop();
+                      isValid = true; // Close dialog on cancel
+                    },
+                    child: Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      if (newStoreId != null && newStoreId!.isNotEmpty) {
+                        // Call the API to verify the store ID
+                        bool isStoreIdValid = await _verifyStoreId(newStoreId!);
+
+                        if (isStoreIdValid) {
+                          _boxLogin.put(
+                              'storeId', newStoreId); // Update Hive box
+                          isValid = true; // Set flag to true to break the loop
+                          Navigator.of(context).pop(); // Close dialog
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Store ID updated to: $newStoreId'),
+                            ),
+                          );
+                        } else {
+                          // Invalid store ID, show error message
+                          setState(() {
+                            errorMessage =
+                                'Invalid Store ID. Please try again.';
+                          });
+                        }
+                      }
+                    },
+                    child: Text('Update'),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      );
+    }
+  }
+
+  // Function to call the API and verify the store ID
+  Future<bool> _verifyStoreId(String storeId) async {
+    // Replace with your API URL
+    final String apiUrl =
+        'https://us-central1-sensorsprok.cloudfunctions.net/api/api/customers/$storeId/list';
+
+    try {
+      print('calling');
+      final response = await http.get(Uri.parse(apiUrl));
+      print(response);
+      if (response.statusCode == 200) {
+        // Parse response body
+        final data = json.decode(response.body);
+        // If the data is not empty, consider it a valid store ID
+        if (data != null && data.isNotEmpty) {
+          return true;
+        }
+      }
+      // If the status code is not 200 or data is empty, return false
+      return false;
+    } catch (e) {
+      // Handle any errors
+      return false;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     String? username = user?.email;
-    String currentStoreId = _boxLogin.get('storeId', defaultValue: 'Not Set') ??
-        'Not Set'; // Retrieve current Store ID
+    String currentStoreId =
+        _boxLogin.get('storeId', defaultValue: 'Not Set') ?? 'Not Set';
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
     double containerWidth = width * 0.85;
