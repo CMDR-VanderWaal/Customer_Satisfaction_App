@@ -31,11 +31,9 @@ class _OverallReportState extends State<OverallReport> {
     setState(() {
       storeId = box.get('storeId');
     });
-
     try {
       final response = await http.get(Uri.parse(
           "https://us-central1-sensorsprok.cloudfunctions.net/api/api/overall/$storeId"));
-      print(storeId);
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
@@ -51,9 +49,9 @@ class _OverallReportState extends State<OverallReport> {
           tempData.sort((a, b) =>
               DateTime.parse(a.date).compareTo(DateTime.parse(b.date)));
 
-          // Fill in missing dates with default values
-          weightedEmotionData = fillMissingDates(tempData);
+          weightedEmotionData = tempData;
 
+          // Initially, display all data
           filteredData = List.from(weightedEmotionData);
           overallSentimentScore = double.parse(data['overallSentimentScore']);
         });
@@ -65,34 +63,19 @@ class _OverallReportState extends State<OverallReport> {
     }
   }
 
-  List<ChartData> fillMissingDates(List<ChartData> data) {
-    if (data.isEmpty) return data;
-    List<ChartData> filledData = [];
-    DateTime current = DateTime.parse(data.first.date);
-    DateTime end = DateTime.parse(data.last.date);
-
-    Map<String, ChartData> dataMap = {for (var item in data) item.date: item};
-
-    while (current.isBefore(end) || current.isAtSameMomentAs(end)) {
-      String dateString = current.toIso8601String().split('T')[0];
-      if (dataMap.containsKey(dateString)) {
-        filledData.add(dataMap[dateString]!);
-      } else {
-        filledData
-            .add(ChartData(date: dateString, weightedEmotionPercents: {}));
-      }
-      current = current.add(Duration(days: 1));
-    }
-
-    return filledData;
-  }
-
   void filterDataByDateRange() {
     if (startDate != null && endDate != null) {
+      DateTime rangeStart = startDate!;
+      DateTime rangeEnd = endDate!;
+
+      // Filter only available data within the range
       setState(() {
         filteredData = weightedEmotionData.where((data) {
           DateTime dataDate = DateTime.parse(data.date);
-          return dataDate.isAfter(startDate!) && dataDate.isBefore(endDate!);
+          return (dataDate.isAfter(rangeStart) ||
+                  dataDate.isAtSameMomentAs(rangeStart)) &&
+              (dataDate.isBefore(rangeEnd) ||
+                  dataDate.isAtSameMomentAs(rangeEnd));
         }).toList();
       });
     } else {
@@ -109,7 +92,7 @@ class _OverallReportState extends State<OverallReport> {
       lastDate: DateTime(2101),
     );
 
-    if (picked != null && picked.start != startDate && picked.end != endDate) {
+    if (picked != null) {
       setState(() {
         startDate = picked.start;
         endDate = picked.end;
@@ -125,17 +108,6 @@ class _OverallReportState extends State<OverallReport> {
       appBar: AppBar(
         title: const Text("Overall Report"),
         elevation: 0,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white),
-              ),
-            ),
-          )
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -166,14 +138,14 @@ class _OverallReportState extends State<OverallReport> {
                   ),
                   series: <ChartSeries>[
                     LineSeries<ChartData, DateTime>(
-                      dataSource: filteredData,
-                      xValueMapper: (ChartData data, _) =>
-                          DateTime.parse(data.date),
-                      yValueMapper: (ChartData data, _) =>
-                          data.weightedEmotionPercents['Happy'] ?? 0,
-                      name: 'Happy',
-                      markerSettings: MarkerSettings(isVisible: false),
-                    ),
+                        dataSource: filteredData,
+                        xValueMapper: (ChartData data, _) =>
+                            DateTime.parse(data.date),
+                        yValueMapper: (ChartData data, _) =>
+                            data.weightedEmotionPercents['Happy'] ?? 0,
+                        name: 'Happy',
+                        color: Colors.green[900],
+                        markerSettings: const MarkerSettings(isVisible: true)),
                     LineSeries<ChartData, DateTime>(
                       dataSource: filteredData,
                       xValueMapper: (ChartData data, _) =>
@@ -181,7 +153,8 @@ class _OverallReportState extends State<OverallReport> {
                       yValueMapper: (ChartData data, _) =>
                           data.weightedEmotionPercents['Neutral'] ?? 0,
                       name: 'Neutral',
-                      markerSettings: MarkerSettings(isVisible: false),
+                      color: Colors.grey[700],
+                      markerSettings: const MarkerSettings(isVisible: true),
                     ),
                     LineSeries<ChartData, DateTime>(
                       dataSource: filteredData,
@@ -190,16 +163,18 @@ class _OverallReportState extends State<OverallReport> {
                       yValueMapper: (ChartData data, _) =>
                           data.weightedEmotionPercents['Surprised'] ?? 0,
                       name: 'Surprised',
-                      markerSettings: MarkerSettings(isVisible: false),
+                      color: Colors.blue,
+                      markerSettings: const MarkerSettings(isVisible: true),
                     ),
                     LineSeries<ChartData, DateTime>(
                       dataSource: filteredData,
                       xValueMapper: (ChartData data, _) =>
                           DateTime.parse(data.date),
                       yValueMapper: (ChartData data, _) =>
-                          data.weightedEmotionPercents['Fearful'] ?? 0,
-                      name: 'Fearful',
-                      markerSettings: MarkerSettings(isVisible: false),
+                          data.weightedEmotionPercents['Concerned'] ?? 0,
+                      name: 'Concerned',
+                      color: Colors.orange,
+                      markerSettings: const MarkerSettings(isVisible: true),
                     ),
                     LineSeries<ChartData, DateTime>(
                       dataSource: filteredData,
@@ -208,25 +183,18 @@ class _OverallReportState extends State<OverallReport> {
                       yValueMapper: (ChartData data, _) =>
                           data.weightedEmotionPercents['Angry'] ?? 0,
                       name: 'Angry',
-                      markerSettings: MarkerSettings(isVisible: false),
+                      color: Colors.red,
+                      markerSettings: const MarkerSettings(isVisible: true),
                     ),
                     LineSeries<ChartData, DateTime>(
                       dataSource: filteredData,
                       xValueMapper: (ChartData data, _) =>
                           DateTime.parse(data.date),
                       yValueMapper: (ChartData data, _) =>
-                          data.weightedEmotionPercents['Sad'] ?? 0,
-                      name: 'Sad',
-                      markerSettings: MarkerSettings(isVisible: false),
-                    ),
-                    LineSeries<ChartData, DateTime>(
-                      dataSource: filteredData,
-                      xValueMapper: (ChartData data, _) =>
-                          DateTime.parse(data.date),
-                      yValueMapper: (ChartData data, _) =>
-                          data.weightedEmotionPercents['Disgusted'] ?? 0,
-                      name: 'Disgusted',
-                      markerSettings: MarkerSettings(isVisible: false),
+                          data.weightedEmotionPercents['Unsatisfied'] ?? 0,
+                      name: 'Unsatisfied',
+                      color: Colors.purple,
+                      markerSettings: const MarkerSettings(isVisible: true),
                     ),
                   ],
                 ),

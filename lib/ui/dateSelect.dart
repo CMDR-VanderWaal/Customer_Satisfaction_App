@@ -4,8 +4,16 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
-
 import 'login.dart';
+
+const Map<String, Color> emotionColors = {
+  'Neutral': Color(0xFF9E9E9E), // Grey
+  'Concerned': Color(0xFFFFA726), // Orange
+  'Surprised': Color(0xFF42A5F5), // Blue
+  'Happy': Color(0xFF66BB6A), // Green
+  'Angry': Color(0xFFEF5350), // Red
+  'Unsatisfied': Color(0xFFAB47BC), // Purple
+};
 
 class DateSelector extends StatefulWidget {
   const DateSelector({Key? key}) : super(key: key);
@@ -230,6 +238,8 @@ class _DateSelectorState extends State<DateSelector> {
                       dateLabels[seriesData.indexOf(datum)],
                   yValueMapper: (datum, _) => datum[emotion] ?? 0.0,
                   name: emotion,
+                  color: emotionColors[emotion] ??
+                      Colors.grey, // Apply color mapping
                 );
               }).toList(),
             ),
@@ -249,8 +259,8 @@ class _DateSelectorState extends State<DateSelector> {
     final box = await Hive.openBox('login');
     String? storeId = box.get('storeId');
 
-    print(
-        'sending request https://us-central1-sensorsprok.cloudfunctions.net/api/api/date-range/$storeId/$formattedStartDate/$formattedEndDate \n');
+    //print(
+    //'sending request https://us-central1-sensorsprok.cloudfunctions.net/api/api/date-range/$storeId/$formattedStartDate/$formattedEndDate \n');
     final response = await http.get(Uri.parse(
         "https://us-central1-sensorsprok.cloudfunctions.net/api/api/date-range/$storeId/$formattedStartDate/$formattedEndDate"));
 

@@ -4,6 +4,15 @@ import 'dart:convert';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
+const Map<String, Color> emotionColors = {
+  'Neutral': Color(0xFF9E9E9E), // Grey
+  'Concerned': Color(0xFFFFA726), // Orange
+  'Surprised': Color(0xFF42A5F5), // Blue
+  'Happy': Color(0xFF66BB6A), // Green
+  'Angry': Color(0xFFEF5350), // Red
+  'Unsatisfied': Color(0xFFAB47BC), // Purple
+};
+
 class EmotionData {
   final String emotion;
   final double percent;
@@ -102,7 +111,7 @@ class _CustomerEmotionStatsState extends State<CustomerEmotionStats> {
 
       setState(() {
         emotionPercents = updatedEmotionPercents;
-        datewiseData = fillMissingDates(updatedDatewiseData);
+        datewiseData = updatedDatewiseData;
         print('Emotion Percents: $emotionPercents');
         print('Datewise Data: $datewiseData');
       });
@@ -129,11 +138,11 @@ class _CustomerEmotionStatsState extends State<CustomerEmotionStats> {
           date: current,
           weightedEmotionPercents: {
             'Neutral': 0.0,
-            'Fearful': 0.0,
+            'Concerned': 0.0,
             'Surprised': 0.0,
             'Happy': 0.0,
             'Angry': 0.0,
-            'Sad': 0.0,
+            'Unsatisfied': 0.0,
           },
         ));
       }
@@ -148,11 +157,14 @@ class _CustomerEmotionStatsState extends State<CustomerEmotionStats> {
     final List<EmotionData> data = emotionPercents.entries
         .map((entry) => EmotionData(emotion: entry.key, percent: entry.value))
         .toList();
+
     return <PieSeries<EmotionData, String>>[
       PieSeries<EmotionData, String>(
         dataSource: data,
         xValueMapper: (EmotionData emotionData, _) => emotionData.emotion,
         yValueMapper: (EmotionData emotionData, _) => emotionData.percent,
+        pointColorMapper: (EmotionData emotionData, _) =>
+            emotionColors[emotionData.emotion] ?? Colors.grey,
         dataLabelMapper: (EmotionData emotionData, _) {
           return '${emotionData.emotion}: ${emotionData.percent.toStringAsFixed(2)}%';
         },
@@ -169,11 +181,11 @@ class _CustomerEmotionStatsState extends State<CustomerEmotionStats> {
       List<DatewiseEmotionData> datewiseData) {
     final List<String> emotions = [
       'Neutral',
-      'Fearful',
+      'Concerned',
       'Surprised',
       'Happy',
       'Angry',
-      'Sad',
+      'Unsatisfied',
     ];
 
     // Add initial data point with all emotions set to 0
@@ -185,12 +197,7 @@ class _CustomerEmotionStatsState extends State<CustomerEmotionStats> {
       date: DateTime(initialDate.year, initialDate.month,
           initialDate.day), // Ensure time is set to 00:00:00
       weightedEmotionPercents: {
-        'Neutral': 0.0,
-        'Fearful': 0.0,
-        'Surprised': 0.0,
-        'Happy': 0.0,
-        'Angry': 0.0,
-        'Sad': 0.0,
+        for (var emotion in emotions) emotion: 0.0,
       },
     );
 
@@ -206,6 +213,7 @@ class _CustomerEmotionStatsState extends State<CustomerEmotionStats> {
         xValueMapper: (DatewiseEmotionData data, _) => data.date,
         yValueMapper: (DatewiseEmotionData data, _) =>
             data.weightedEmotionPercents[emotion] ?? 0,
+        color: emotionColors[emotion] ?? Colors.grey, // Map emotion to color
         dataLabelSettings: DataLabelSettings(
           isVisible: false,
         ),
